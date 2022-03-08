@@ -27,7 +27,7 @@ fetch("http://localhost:3000/api/products/")
 
     
 
-      .innerHTML += " <a href='./product.html?id=(&{i._id})'><article><img src='.../product01.jpg' alt=(i.altTxt)/><h3 class='productName'>Kanap name1</h3><p class='productDescription'>Dis enim malesuada risus sapien gravida nulla nisl arcu. Dis enim malesuada risus sapien gravida nulla nisl arcu.</p></article></a>"
+      .innerHTML += " <a href='./product.html?id=i._id'><article><img src='i.urlImage' alt=i.altTxt/><h3 class='productName'>i.name</h3><p class='productDescription'>i.description</p></article></a>"
       ;
     }
   })
