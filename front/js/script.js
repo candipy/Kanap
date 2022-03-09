@@ -18,7 +18,7 @@ fetch("http://localhost:3000/api/products/")
     // for (i of products) {
     //   console.log(i.name)
     // }
-    for (i of products){
+    for (let i of products){
 
       //Pour chaque tour dans products, on pointe l'ID "items" dans HTML
       document
@@ -30,7 +30,7 @@ fetch("http://localhost:3000/api/products/")
       // Ca n'a fonctionné que quand j'ai copié collé depuis le code commenté dans index.html. quand j'ai tappé avec des tab ou des espaces ou sans ca n'a pas fonctionné 
 
       
-      .innerHTML += `<a href="./product.html?${i._id}">
+      .innerHTML += `<a href="./product.html?id=${i._id}">
       <article>
         <img src=${i.imageUrl} alt=${i.altTxt} />
         <h3 class="productName">${i.name}</h3>
