@@ -8,7 +8,7 @@ const url = new URL(location.href);
 //2) Recherche dans l'url le paramètre de l'ID
 const idProduct = url.searchParams.get("id");
 // Vérification dans la console
-console.log(idProduct);
+console.log("Id du produit selectionné sur la page index : ", idProduct);
 
 // B. Intérroger l'API avec l'ID qui est maintenant présent
 const productsAPIId = `http://localhost:3000/api/products/${idProduct}`;
@@ -21,7 +21,7 @@ fetch(productsAPIId)
   })
 
   .then((product) => {
-    console.log(product);
+    console.log("Elements trouvés dans l'API pour le produit : ", product);
     addHTML(product);
     addCart(product);
   })
@@ -59,7 +59,7 @@ function addHTML(product) {
   // Pour chaque couleur dans product, création d'une nouvelle entrée value
   for (let color of product.colors) {
     // Pour chaque color dans colors de products provennant de l'API
-    console.log(color);
+    console.log("Coloris disponibles : ", color);
     // ajouter à couleur (selectionné par id) dans HTML de l'option {color}
     colorsHTML.innerHTML += `<option value="${color}">${color}</option>`;
   }
@@ -74,13 +74,13 @@ function addCart(product) {
     // Récupèrer les valeurs nécessaires couleur, quantité, id
     const colorsHTML = document.getElementById("colors");
     let colorsSelect = colorsHTML.value;
-    console.log(colorsSelect);
+    console.log("Coloris selectionné : ", colorsSelect);
 
     const quantityHTML = document.getElementById("quantity");
     let quantitySelect = quantityHTML.value;
-    console.log(quantitySelect);
+    console.log("Quantité selectionnée : ", quantitySelect);
 
-    console.log(idProduct);
+    console.log("Rappel de l'id du produit : ", idProduct);
 
     // Conditions de commande pour l'utilisateur :
     // - Il doit selectionner une couleur
@@ -100,24 +100,48 @@ function addCart(product) {
       // Création d'un objet avec les éléments selectionnés par le client
       let productSelect = {
         color: colorsSelect,
-        quantity: quantitySelect,
+        quantity: Number(quantitySelect), // Pour additionner les quantité, transformation en nombres
         id: idProduct,
       };
-      console.log(productSelect);
+      console.log("Récapitulatif du produit selectionné en objet Javascript : ", productSelect);
 
       // Création d'une variable qui interroge le localStorage en object Javascript
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
 
       if (localStorageCart) {
-        if (localStorageCart.find((element) => element.id == productSelect.id)) {
-          console.log("trouvé");
-        } else {
-          console.log("pas trouvé");
-        }
         // Si le local Storage appelé localStorageCart est bien lu (donc existe)
-        localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
-        localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
+
+        // Création d'une nouvelle variable productAlreadyordered
+        // Cherche dans chaque objet de localStorageCart et vérifie si identique id + color trouvé dans productSelect
+
+        // Réponse de find = true ou false
+        let productAlreadyOrdered = localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.id == productSelect.id) && localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.color == productSelect.color);
+
+        if (productAlreadyOrdered) {
+          // Si productAlreadyOrdered est true donc répond aux 2 conditions
+          console.log("Trouvé : ", productAlreadyOrdered, "dans le localStorage"); // Voila ce qui a été trouvé
+          parseInt(productAlreadyOrdered.quantity); // Transformation de la quantité dans cet objet en nombres (idem à Number)
+          console.log("Quantité déjà commandée : ", productAlreadyOrdered.quantity); // Quantité déjà commandée
+          console.log("Quantité que le client veut commander : ", productSelect.quantity); // Quantité que le client veut commander
+          productAlreadyOrdered.quantity = productAlreadyOrdered.quantity + productSelect.quantity;
+          // Modification de la quantité déjà commandée  =
+          // quantité précedement commandée + quantité en selection que le client veut ajouter
+          console.log("Nouvelle quantité commandée : ", productAlreadyOrdered.quantity);
+
+          if (productAlreadyOrdered.quantity > 100) {
+            // Si la quantité dans le local Storage dépasse 100, message + limitation à 100
+            alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
+            productAlreadyOrdered.quantity = 100;
+            localStorage.setItem("products", JSON.stringify(localStorageCart));
+          } else {
+            // Sinon => Enregistrement dans le local storage en chaine de caractères
+            localStorage.setItem("products", JSON.stringify(localStorageCart));
+          }
+        } else {
+          localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
+          localStorage.setItem("products", JSON.stringify(localStorageCart));
+        } // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
       } else {
         // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
         let cart = []; // Création d'un tableau vide à chaque click
