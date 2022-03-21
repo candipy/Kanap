@@ -13,9 +13,6 @@ console.log(idProduct);
 // B. Intérroger l'API avec l'ID qui est maintenant présent
 const productsAPIId = `http://localhost:3000/api/products/${idProduct}`;
 
-// C. Création d'un tableau Cart qui va contenir les articles selectionnés par le client
-let cart = [];
-
 fetch(productsAPIId)
   .then(function (res) {
     if (res.ok) {
@@ -89,15 +86,16 @@ function addCart(product) {
     // - Il doit selectionner une couleur
     // - Il doit saisir une quantité supérieur à 0 et inférieure à 100
 
-    if (colorsSelect == "" || quantitySelect < 0 || quantitySelect > 100) {
+    if (colorsSelect == "" || quantitySelect <= 0 || quantitySelect > 100) {
       alert("Pour ajouter l'article souhaité, veuillez selectionner une couleur valide et une quantité comprise entre 1 et 100");
 
       //  Conditions pour que l'article s'ajoute dans le panier :
       // Vérifier si le local storage contient quelque chose
-      //      Si le localStorage est vide, alors on ajoute l'article
-      //      Sinon : (le locale Storage contient déjà quelque chose)
-      //              Si il y a un article dont la couleur et id sont identique => Ajoute la quantité à celle déjà présente sans dépasser la quantité de 100
+      //
+      //      Si le locale Storage contient déjà quelque chose
+      //              Si il y a un article dont la couleur et id sont identiques => Ajoute la quantité à celle déjà présente sans dépasser la quantité de 100
       //              Si il y a un article dont l'id et ou couleur différent => Ajoute de l'article
+      //        Sinon ajout de l'article
     } else {
       // Création d'un objet avec les éléments selectionnés par le client
       let productSelect = {
@@ -107,46 +105,20 @@ function addCart(product) {
       };
       console.log(productSelect);
 
-      // Interroger le local storage :
-      // Création d'une variable qui contient le localStorage en object Javascript
-
-      // let cart = []
+      // Création d'une variable qui interroge le localStorage en object Javascript
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
-      console.log(localStorageCart);
 
-      if (localStorageCart == null) {
-        // Si le locale storage est vide
-        // let cart=[]
-        cart.push(productSelect); // Ajout du produit selectionné dans le tableau cart
-        localStorage.setItem("products", JSON.stringify(cart));
+      if (localStorageCart) {
+        // Si le local Storage appelé localStorageCart est bien lu (donc existe)
+        localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
+        localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
       } else {
-        // Si le local Storage n'est pas vide
-        // Trouve le même id et la même couleur dans le local storage
-        //  let cart =[]
-        // cart.push(productSelect)
-        localStorageCart.push(productSelect);
-        localStorage.setItem("products", JSON.stringify(localStorageCart));
+        // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
+        let cart = []; // Création d'un tableau vide à chaque click
+        cart.push(productSelect); // Ajout à ce tableau du produit selectionné
+        localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères
       }
-
-      // // productPanier =[couleurAdd,quantitéAdd,idProduct]
-      // // console.log(productPanier)
-
-      // let localStorageProduits = []
-      // localStorageProduits.push(productSelect)
-      // console.log(localStorageProduits)
-
-      // // Transformation en ligne de caractère de l'objet productPanier
-      // let productPanierJson = JSON.stringify(localStorageProduits)
-      // console.log(productPanierJson)
-
-      // // Ajout dans le local storage du produit selectionné par le client
-      // localStorage.setItem('panier',productPanierJson)
     }
   });
 }
-
-// function localeStorageAdd(product){
-
-//     localStorage.setItem('products', productPanierJson)
-// }
