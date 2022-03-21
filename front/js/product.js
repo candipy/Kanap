@@ -110,6 +110,11 @@ function addCart(product) {
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
 
       if (localStorageCart) {
+        if (localStorageCart.find((element) => element.id == productSelect.id)) {
+          console.log("trouvé");
+        } else {
+          console.log("pas trouvé");
+        }
         // Si le local Storage appelé localStorageCart est bien lu (donc existe)
         localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
         localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
@@ -117,6 +122,7 @@ function addCart(product) {
         // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
         let cart = []; // Création d'un tableau vide à chaque click
         cart.push(productSelect); // Ajout à ce tableau du produit selectionné
+
         localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères
       }
     }
