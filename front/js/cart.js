@@ -9,7 +9,7 @@ console.log("Affichage du local storage au chargement de la page : ", localStora
 
 // B. Récupérer l'API
 
-const productsAPI = "http://localhost:3000/api/products/";
+const productsAPI = `http://localhost:3000/api/products/`;
 
 // C. Récupérer ID items dans HTML
 const itemsHtml = document.getElementById("cart__items");
@@ -27,8 +27,8 @@ for (let productLS of localStorageCart) {
     .then(function (productAPI) {
       console.log(productAPI);
       // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
-      console.log(productAPI.name);
-      let priceTotalProductSelect = productAPI.price * productLS.quantity;
+      console.log(productLS);
+      let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
       itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
                 <div class="cart__item__img">
                   <img src="${productAPI.imageUrl}" alt="${productAPI.src}">
