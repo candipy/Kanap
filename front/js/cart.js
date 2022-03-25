@@ -78,11 +78,13 @@ if (localStorage.getItem("products") === null) {
             let articleHTMLcolor = articleHMTL.dataset.color;
             console.log(articleHTMLcolor, productLS.color);
 
-            // if ((articleHTMLId && articleHTMLcolor) == (productLS.id && productLS.color)) {
-            //   console.log(articleHTMLcolor);
-            // } else {
-            //   alert("pas le même");
-            // }
+            let newQuantity = e.target.value;
+            console.log(newQuantity);
+
+            productLS.quantity = newQuantity;
+            console.log(productLS.quantity);
+
+            localStorage.setItem("products", JSON.stringify(localStorageCart));
           });
         });
       })
@@ -92,3 +94,22 @@ if (localStorage.getItem("products") === null) {
       });
   }
 }
+
+// console.log(input, key);
+//           console.log(productLS);
+//           console.log(localStorageCart[key].color);
+//           input.addEventListener("change", (e) => {
+//             console.log(e.target);
+//             console.log(localStorageCart[key].color);
+//             // Ecoute du changement de l'évenement (quantité)
+
+//             let articleHMTL = e.target.closest("article");
+//             let articleHTMLId = articleHMTL.dataset.id;
+//             let articleHTMLcolor = articleHMTL.dataset.color;
+//             console.log(articleHTMLcolor, localStorageCart[key].color);
+
+//             if ((articleHTMLId && articleHTMLcolor) == (localStorageCart[key].id && localStorageCart[key].color)) {
+//               alert("ok !");
+//             } else {
+//               alert("pas le même");
+//             }
