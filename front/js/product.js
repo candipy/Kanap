@@ -68,6 +68,7 @@ function addHTML(product) {
 // Fonction qui récupère les données de la promise .then(product) et qui permet de récupérer l'article et de l'ajouter au local storage
 
 function addCart(product) {
+  let nameSelect = product.name;
   // Ecouter le click sur le bouton "ajouter au panier" dans HTML = va lancer la fonction à chaque click
   const buttonHTML = document.getElementById("addToCart");
   buttonHTML.addEventListener("click", function (product) {
@@ -81,6 +82,9 @@ function addCart(product) {
     console.log("Quantité selectionnée : ", quantitySelect);
 
     console.log("Rappel de l'id du produit : ", idProduct);
+
+    let imageUrlSelect = document.querySelector(".item__img>img").src;
+    let imageAltSelect = document.querySelector(".item__img>img").alt;
 
     // Conditions de commande pour l'utilisateur :
     // - Il doit selectionner une couleur
@@ -102,6 +106,9 @@ function addCart(product) {
         color: colorsSelect,
         quantity: Number(quantitySelect), // Pour additionner les quantité, transformation en nombres
         id: idProduct,
+        src: imageUrlSelect,
+        alt: imageAltSelect,
+        name: nameSelect,
       };
       console.log("Récapitulatif du produit selectionné en objet Javascript : ", productSelect);
 
@@ -145,6 +152,7 @@ function addCart(product) {
       } else {
         // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
         let cart = []; // Création d'un tableau vide à chaque click
+        console.log(cart);
         cart.push(productSelect); // Ajout à ce tableau du produit selectionné
 
         localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères

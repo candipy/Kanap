@@ -2,62 +2,93 @@
 
 // Besoins :
 
-// A. Récupérer le local storage
-
-let localStorageCart = JSON.parse(localStorage.getItem("products"));
-console.log("Affichage du local storage au chargement de la page : ", localStorageCart);
-
-// B. Récupérer l'API
-
-const productsAPI = `http://localhost:3000/api/products/`;
-
-// C. Récupérer ID items dans HTML
+// A. Récupérer éléments dans HTML
 const itemsHtml = document.getElementById("cart__items");
 
-for (let productLS of localStorageCart) {
-  // Pour chaque produit dans le local Storage récupérer son id
-  console.log(productLS.quantity);
-  fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage
-    .then(function (res) {
-      if (res.ok) {
-        return res.json();
-      }
-    })
+// B. Vérifier qu'il y qq chose dans le local Storage
+console.log(localStorage.getItem("products")); // Si vide résultat = null, sinon objet JSON
 
-    .then(function (productAPI) {
-      console.log(productAPI);
-      // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
-      console.log(productLS);
-      let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
-      itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
-                <div class="cart__item__img">
-                  <img src="${productAPI.imageUrl}" alt="${productAPI.src}">
-                </div>
-                <div class="cart__item__content">
-                  <div class="cart__item__content__description">
-                    <h2>${productAPI.name}</h2>
-                    <p>Couleur Selectionnée : ${productLS.color}</p>
-                        <div class = "cart__item__content__titlePrice">
-                            <p>Prix Unitaire : ${productAPI.price} €</p>
-                            <p> Prix Total : ${priceTotalProductSelect} € </p>
-                         </div>
-                  </div>
-                  <div class="cart__item__content__settings">
-                    <div class="cart__item__content__settings__quantity">
-                      <p>Qté : </p>
-                      <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productLS.quantity}">
-                    </div>
-                    <div class="cart__item__content__settings__delete">
-                    
-                    
-                      <p class="deleteItem">Supprimer</p>
-                    </div>
-                  </div>
-                </div>
-              </article>`;
-    })
+if (localStorage.getItem("products") === null) {
+  itemsHtml.innerHTML = `<p>Votre panier est actuellement vide</p>`;
+} else {
+  let localStorageCart = JSON.parse(localStorage.getItem("products")); // si le résultat est pas null, construction en objet Javascript
 
-    .catch(function (err) {
-      // Une erreur est survenue
-    });
+  for (let productLS of localStorageCart) {
+    // Pour chaque produit dans le local Storage récupérer son id
+
+    fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage = envoi un requete
+      .then(function (res) {
+        // objet réponse de l'aPI
+        if (res.ok) {
+          // Si on a une réponse
+          return res.json(); // Retourne la réponse en objet json
+        }
+      })
+
+      .then((productAPI) => {
+        // console.log(productAPI);
+        // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
+        // console.log(productLS);
+        let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
+
+        itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
+                    <div class="cart__item__img">
+                      <img src="${productLS.src}" alt="${productLS.alt}">
+                    </div>
+                    <div class="cart__item__content">
+                      <div class="cart__item__content__description">
+                        <h2>${productLS.name}</h2>
+                        <p>Couleur Selectionnée : ${productLS.color}</p>
+                            <div class = "cart__item__content__titlePrice">
+                                <p>Prix Unitaire : ${productAPI.price} €</p>
+                                <p> Prix Total : ${priceTotalProductSelect} € </p>
+                             </div>
+                      </div>
+                      <div class="cart__item__content__settings">
+                        <div class="cart__item__content__settings__quantity">
+                          <p>Qté : </p>
+                          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${productLS.quantity}">
+                        </div>
+                        <div class="cart__item__content__settings__delete">
+                        
+                        
+                          <p class="deleteItem">Supprimer</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>`;
+
+        // Modification de la quantité
+      })
+      .then((productAPI) => {
+        console.log(productLS);
+        let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Renvoi une nodeList qui peut être itéré comme un tableau
+
+        inputsQuantity.forEach((input, key) => {
+          // pour chaque élément=input dans inputsQuantity
+          console.log(input, key);
+          console.log(productLS);
+
+          input.addEventListener("change", (e) => {
+            console.log(e.target);
+            // Ecoute du changement de l'évenement (quantité)
+
+            let articleHMTL = e.target.closest("article");
+            let articleHTMLId = articleHMTL.dataset.id;
+            let articleHTMLcolor = articleHMTL.dataset.color;
+            console.log(articleHTMLcolor, productLS.color);
+
+            // if ((articleHTMLId && articleHTMLcolor) == (productLS.id && productLS.color)) {
+            //   console.log(articleHTMLcolor);
+            // } else {
+            //   alert("pas le même");
+            // }
+          });
+        });
+      })
+
+      .catch(function (err) {
+        // Une erreur est survenue
+      });
+  }
 }
