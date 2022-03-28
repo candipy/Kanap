@@ -13,7 +13,7 @@ if (localStorage.getItem("products") === null) {
 } else {
   let localStorageCart = JSON.parse(localStorage.getItem("products")); // si le résultat est pas null, construction en objet Javascript
 
-  for (let productLS of localStorageCart) {
+  localStorageCart.forEach((productLS) => {
     // Pour chaque produit dans le local Storage récupérer son id
 
     fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage = envoi un requete
@@ -26,18 +26,17 @@ if (localStorage.getItem("products") === null) {
       })
 
       .then((productAPI) => {
-        // console.log(productAPI);
         // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
         // console.log(productLS);
         let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
 
         itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
                     <div class="cart__item__img">
-                      <img src="${productLS.src}" alt="${productLS.alt}">
+                      <img src="${productAPI.imageUrl}" alt="${productAPI.altTxt}">
                     </div>
                     <div class="cart__item__content">
                       <div class="cart__item__content__description">
-                        <h2>${productLS.name}</h2>
+                        <h2>${productAPI.name}</h2>
                         <p>Couleur Selectionnée : ${productLS.color}</p>
                             <div class = "cart__item__content__titlePrice">
                                 <p>Prix Unitaire : ${productAPI.price} €</p>
@@ -61,38 +60,40 @@ if (localStorage.getItem("products") === null) {
         // Modification de la quantité
       })
       .then((productAPI) => {
-        console.log(productLS);
         let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Renvoi une nodeList qui peut être itéré comme un tableau
 
         inputsQuantity.forEach((input, key) => {
           // pour chaque élément=input dans inputsQuantity
-          console.log(input, key);
-          console.log(productLS);
 
           input.addEventListener("change", (e) => {
-            console.log(e.target);
-            // Ecoute du changement de l'évenement (quantité)
+            console.log(e.target.value);
 
+            // Ecoute du changement de l'évenement (quantité)
             let articleHMTL = e.target.closest("article");
             let articleHTMLId = articleHMTL.dataset.id;
             let articleHTMLcolor = articleHMTL.dataset.color;
-            console.log(articleHTMLcolor, productLS.color);
+            console.log("Dans HTML=", articleHTMLcolor, "productLS.color=", productLS.color, "localStorage[Key de la boucle foreach sur HTML=", localStorageCart[key].color);
+            console.log(articleHTMLId, productLS.id, localStorageCart[key].id);
 
-            let newQuantity = e.target.value;
-            console.log(newQuantity);
+            if (articleHTMLId == productLS.id && productLS.color == articleHTMLcolor) {
+              alert("ok !");
 
-            productLS.quantity = newQuantity;
-            console.log(productLS.quantity);
+              let newQuantity = e.target.value;
+              console.log(newQuantity);
 
-            localStorage.setItem("products", JSON.stringify(localStorageCart));
+              productLS.quantity = parseInt(newQuantity);
+              console.log(productLS.quantity);
+              localStorage.setItem("products", JSON.stringify(localStorageCart));
+            } else {
+              alert("pas le même");
+            }
           });
         });
       })
-
       .catch(function (err) {
         // Une erreur est survenue
       });
-  }
+  });
 }
 
 // console.log(input, key);
