@@ -8,6 +8,10 @@ const itemsHtml = document.getElementById("cart__items");
 // B. Vérifier qu'il y qq chose dans le local Storage
 console.log(localStorage.getItem("products")); // Si vide résultat = null, sinon objet JSON
 
+// C. Initialisation de données nécessaires
+let totalQuantity = 0; // Sera modifié à chaque produit
+let totalPrice = 0; // Sera modifié à chaque produit
+
 if (localStorage.getItem("products") === null) {
   itemsHtml.innerHTML = `<p>Votre panier est actuellement vide</p>`;
 } else {
@@ -56,37 +60,86 @@ if (localStorage.getItem("products") === null) {
                       </div>
                     </div>
                   </article>`;
+        //  Cumul de la quantité de produits commandés :
+        totalQuantity += productLS.quantity;
+        console.log(totalQuantity);
+        document.getElementById("totalQuantity").textContent = `${totalQuantity}`;
 
-        // Modification de la quantité
+        //  Cumul de la quantité de produits commandés :
+        totalPrice += priceTotalProductSelect;
+        console.log(totalPrice);
+        document.getElementById("totalPrice").textContent = `${totalPrice}`;
+        return productAPI;
       })
-      .then((productAPI) => {
-        let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Renvoi une nodeList qui peut être itéré comme un tableau
+      .then(() => {
+        // Modification de la quantité
+
+        let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Cible les quantités et renvoi une nodeList qui peut être itéré comme un tableau
 
         inputsQuantity.forEach((input, key) => {
           // pour chaque élément=input dans inputsQuantity
 
           input.addEventListener("change", (e) => {
-            console.log(e.target.value);
+            let articleHMTL = e.target.closest("article"); // Cibler la balise Article la plus proche de la quantité modifiée
+            let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
+            let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
+            let findArticle = localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor);
+            // Trouver le premier article (findArticle) dans le local storage qui respecte la condition suivante :
+            // - ID dans le localStorage = Id trouvé dans la la balise article
+            // ET
+            // - Couleur dans le localStorage = couleur trouvée dans la balise article
+            console.log(findArticle);
 
-            // Ecoute du changement de l'évenement (quantité)
-            let articleHMTL = e.target.closest("article");
-            let articleHTMLId = articleHMTL.dataset.id;
-            let articleHTMLcolor = articleHMTL.dataset.color;
-            console.log("Dans HTML=", articleHTMLcolor, "productLS.color=", productLS.color, "localStorage[Key de la boucle foreach sur HTML=", localStorageCart[key].color);
-            console.log(articleHTMLId, productLS.id, localStorageCart[key].id);
+            if (findArticle !== undefined) {
+              // Si findArticle n'est pas undefined (réponse de .find)
 
-            if (articleHTMLId == productLS.id && productLS.color == articleHTMLcolor) {
-              alert("ok !");
+              findArticle.quantity = parseInt(e.target.value); // la quantité trouvé dans le localStorage devient la nouvelle quantité, en nombre // Cibler la value du itemsQuantity changé
 
-              let newQuantity = e.target.value;
-              console.log(newQuantity);
-
-              productLS.quantity = parseInt(newQuantity);
-              console.log(productLS.quantity);
-              localStorage.setItem("products", JSON.stringify(localStorageCart));
-            } else {
-              alert("pas le même");
+              if (findArticle.quantity > 100) {
+                alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
+                e.target.value = 100;
+                findArticle.quantity = parseInt(e.target.value);
+                localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi 100 dans le Local Storage
+              } else if (findArticle.quantity <= 0) {
+                findArticle.quantity = parseInt(e.target.value);
+                debugger;
+                localStorage.removeItem("products", JSON.stringify(localStorageCart));
+              } else {
+                findArticle.quantity = parseInt(e.target.value);
+                localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi dans le localStorage de la nouvelle quantité
+              }
             }
+            location.reload();
+          });
+        });
+      })
+
+      .then(() => {
+        // Suppression d'un article
+
+        let inputsDelete = document.querySelectorAll(".deleteItem"); // Cible les boutons "Supprimer"
+
+        inputsDelete.forEach((input, key) => {
+          // pour chaque élément=input dans inputsDelete
+
+          input.addEventListener("click", (e) => {
+            let articleHMTL = e.target.closest("article"); // Cible la balise article la plus proche du bouton supprimé
+            let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
+            let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
+            localStorageCart = localStorageCart.filter((e) => e.id !== articleHTMLId || e.color !== articleHTMLcolor);
+            //Renvoi un tableau filtré avec les critères suivants :
+            // - Element doit avoir un id différent de celui trouvé dans HTML
+            // OU
+            // - Element doit avoir une couleur différentes de celle trouvée dans HTML
+            // => Soit un tableau sans l'élément du correspondant au bouton cliqué 'supprimer'
+
+            articleHMTL.remove(); // Suppression de la balise article correspondante
+            localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement du localStrageCart filtré
+
+            if (localStorageCart.length <= 0) {
+              localStorage.clear("products");
+            }
+            location.reload();
           });
         });
       })
@@ -95,22 +148,3 @@ if (localStorage.getItem("products") === null) {
       });
   });
 }
-
-// console.log(input, key);
-//           console.log(productLS);
-//           console.log(localStorageCart[key].color);
-//           input.addEventListener("change", (e) => {
-//             console.log(e.target);
-//             console.log(localStorageCart[key].color);
-//             // Ecoute du changement de l'évenement (quantité)
-
-//             let articleHMTL = e.target.closest("article");
-//             let articleHTMLId = articleHMTL.dataset.id;
-//             let articleHTMLcolor = articleHMTL.dataset.color;
-//             console.log(articleHTMLcolor, localStorageCart[key].color);
-
-//             if ((articleHTMLId && articleHTMLcolor) == (localStorageCart[key].id && localStorageCart[key].color)) {
-//               alert("ok !");
-//             } else {
-//               alert("pas le même");
-//             }
