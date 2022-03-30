@@ -109,7 +109,7 @@ function addCart(product) {
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
 
-      if (localStorageCart) {
+      if (localStorageCart !== null) {
         // Si le local Storage appelé localStorageCart est bien lu (donc existe)
 
         // Création d'une nouvelle variable productAlreadyordered
@@ -118,8 +118,8 @@ function addCart(product) {
         // Réponse de find = true ou false
         let productAlreadyOrdered = localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.id == productSelect.id) && localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.color == productSelect.color);
 
-        if (productAlreadyOrdered) {
-          // Si productAlreadyOrdered est true donc répond aux 2 conditions
+        if (productAlreadyOrdered !== undefined) {
+          // Si productAlreadyOrdered n'est pas Undefined
           console.log("Trouvé : ", productAlreadyOrdered, "dans le localStorage"); // Voila ce qui a été trouvé
           parseInt(productAlreadyOrdered.quantity); // Transformation de la quantité dans cet objet en nombres (idem à Number)
           console.log("Quantité déjà commandée : ", productAlreadyOrdered.quantity); // Quantité déjà commandée

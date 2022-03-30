@@ -83,29 +83,28 @@ if (localStorage.getItem("products") === null) {
             let articleHMTL = e.target.closest("article"); // Cibler la balise Article la plus proche de la quantité modifiée
             let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
             let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
-            let findArticle = localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor);
+            let articleChanged = localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor);
             // Trouver le premier article (findArticle) dans le local storage qui respecte la condition suivante :
             // - ID dans le localStorage = Id trouvé dans la la balise article
             // ET
             // - Couleur dans le localStorage = couleur trouvée dans la balise article
-            console.log(findArticle);
 
-            if (findArticle !== undefined) {
+            if (articleChanged !== undefined) {
               // Si findArticle n'est pas undefined (réponse de .find)
 
-              findArticle.quantity = parseInt(e.target.value); // la quantité trouvé dans le localStorage devient la nouvelle quantité, en nombre // Cibler la value du itemsQuantity changé
+              articleChanged.quantity = parseInt(e.target.value); // la quantité trouvé dans le localStorage devient la nouvelle quantité, en nombre // Cibler la value du itemsQuantity changé
 
-              if (findArticle.quantity > 100) {
+              if (articleChanged.quantity > 100) {
                 alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
                 e.target.value = 100;
-                findArticle.quantity = parseInt(e.target.value);
+                articleChanged.quantity = parseInt(e.target.value);
                 localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi 100 dans le Local Storage
-              } else if (findArticle.quantity <= 0) {
-                findArticle.quantity = parseInt(e.target.value);
+              } else if (articleChanged.quantity <= 0) {
+                articleChanged.quantity = parseInt(e.target.value);
                 debugger;
                 localStorage.removeItem("products", JSON.stringify(localStorageCart));
               } else {
-                findArticle.quantity = parseInt(e.target.value);
+                articleChanged.quantity = parseInt(e.target.value);
                 localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi dans le localStorage de la nouvelle quantité
               }
             }
