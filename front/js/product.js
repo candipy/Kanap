@@ -7,6 +7,7 @@
 const url = new URL(location.href);
 //2) Recherche dans l'url le paramètre de l'ID
 const idProduct = url.searchParams.get("id");
+
 // Vérification dans la console
 console.log("Id du produit selectionné sur la page index : ", idProduct);
 
@@ -103,50 +104,63 @@ function addCart(product) {
         quantity: Number(quantitySelect), // Pour additionner les quantité, transformation en nombres
         id: idProduct,
       };
-      console.log("Récapitulatif du produit selectionné en objet Javascript : ", productSelect);
 
       // Création d'une variable qui interroge le localStorage en object Javascript
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
+      console.log(localStorageCart);
+      // Permet de cibler le paragraphe qui sera modifié quand ajoute des produits
+      const divPQuantityHtml = document.querySelector(".item__content__settings > p");
 
       if (localStorageCart !== null) {
-        // Si le local Storage appelé localStorageCart est bien lu (donc existe)
-
-        // Création d'une nouvelle variable productAlreadyordered
         // Cherche dans chaque objet de localStorageCart et vérifie si identique id + color trouvé dans productSelect
-
-        // Réponse de find = true ou false
+        // Création d'une nouvelle variable productAlreadyordered
         let productAlreadyOrdered = localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.id == productSelect.id) && localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.color == productSelect.color);
 
         if (productAlreadyOrdered !== undefined) {
-          // Si productAlreadyOrdered n'est pas Undefined
-          console.log("Trouvé : ", productAlreadyOrdered, "dans le localStorage"); // Voila ce qui a été trouvé
+          // Si le produit a déjà été commandé
           parseInt(productAlreadyOrdered.quantity); // Transformation de la quantité dans cet objet en nombres (idem à Number)
-          console.log("Quantité déjà commandée : ", productAlreadyOrdered.quantity); // Quantité déjà commandée
-          console.log("Quantité que le client veut commander : ", productSelect.quantity); // Quantité que le client veut commander
-          productAlreadyOrdered.quantity = productAlreadyOrdered.quantity + productSelect.quantity;
           // Modification de la quantité déjà commandée  =
           // quantité précedement commandée + quantité en selection que le client veut ajouter
-          console.log("Nouvelle quantité commandée : ", productAlreadyOrdered.quantity);
+          productAlreadyOrdered.quantity = productAlreadyOrdered.quantity + productSelect.quantity;
 
           if (productAlreadyOrdered.quantity > 100) {
-            // Si la quantité dans le local Storage dépasse 100, message + limitation à 100
-            alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
+            // Si la quantité dépasse 100
             productAlreadyOrdered.quantity = 100;
+            divPQuantityHtml.innerText = `Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée à ${productAlreadyOrdered.quantity} exemplaires de cet article`;
             localStorage.setItem("products", JSON.stringify(localStorageCart));
           } else {
-            // Sinon => Enregistrement dans le local storage en chaine de caractères
+            // Si la quantité ne dépasse pas 100
             localStorage.setItem("products", JSON.stringify(localStorageCart));
+            if (productSelect.quantity == 1) {
+              divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+            } else {
+              divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+            }
           }
         } else {
+          // Si productAlreadyOrdered est Undefined => Si il n'y a pas de produit identique déjà commandé
           localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
-          localStorage.setItem("products", JSON.stringify(localStorageCart));
-        } // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
+
+          if (productSelect.quantity == 1) {
+            divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+          } else {
+            divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient ${productSelect.quantity}`;
+          }
+
+          localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
+        }
       } else {
         // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
         let cart = []; // Création d'un tableau vide à chaque click
         console.log(cart);
         cart.push(productSelect); // Ajout à ce tableau du produit selectionné
+
+        if (productSelect.quantity == 1) {
+          divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+        } else {
+          divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+        }
 
         localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères
       }
