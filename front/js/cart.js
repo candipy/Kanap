@@ -11,6 +11,7 @@ console.log(localStorage.getItem("products")); // Si vide résultat = null, sino
 // C. Initialisation de données nécessaires
 let totalQuantity = 0; // Sera modifié à chaque produit
 let totalPrice = 0; // Sera modifié à chaque produit
+let products = [];
 
 if (localStorage.getItem("products") === null) {
   itemsHtml.innerHTML = `<p>Votre panier est actuellement vide</p>`;
@@ -69,6 +70,10 @@ if (localStorage.getItem("products") === null) {
         totalPrice += priceTotalProductSelect;
         console.log(totalPrice);
         document.getElementById("totalPrice").textContent = `${totalPrice}`;
+
+        // Récupère ID du produit à mettre dans un tableau pour passer la requete POST vers l'API
+        products.push(productLS.id);
+
         return productAPI;
       })
       .then(() => {
@@ -125,7 +130,9 @@ if (localStorage.getItem("products") === null) {
             let articleHMTL = e.target.closest("article"); // Cible la balise article la plus proche du bouton supprimé
             let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
             let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
+            debugger;
             localStorageCart = localStorageCart.filter((e) => e.id !== articleHTMLId || e.color !== articleHTMLcolor);
+            console.log(localStorageCart);
             //Renvoi un tableau filtré avec les critères suivants :
             // - Element doit avoir un id différent de celui trouvé dans HTML
             // OU
@@ -135,7 +142,7 @@ if (localStorage.getItem("products") === null) {
             articleHMTL.remove(); // Suppression de la balise article correspondante
             localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement du localStrageCart filtré
 
-            if (localStorageCart.length <= 0) {
+            if (localStorageCart.length < 0) {
               localStorage.clear("products");
             }
             location.reload();
@@ -146,4 +153,181 @@ if (localStorage.getItem("products") === null) {
         // Une erreur est survenue
       });
   });
+}
+
+// ----- Validation du formulaire-----
+
+//A.  Selection du bouton Commander
+const btnOrder = document.querySelector("#order");
+
+//B. Selection des inputs du formulaire
+
+let firstNameInput = document.getElementById("firstName");
+let lastNameInput = document.getElementById("lastName");
+let addressInput = document.getElementById("address");
+let cityInput = document.getElementById("city");
+let emailInput = document.getElementById("email");
+
+// C. Validation des entrées
+function RegexAlpha(value) {
+  return /^[A-Za-zÀ-ž-'\s]+$/.test(value);
+}
+
+function RegexAlphaNum(value) {
+  return /^[a-zA-ZÀ-ž0-9,'-\s]+$/.test(value);
+}
+
+function RegexEmail(value) {
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+.[a-zA-Z]{2,4}$/.test(value);
+}
+//    Vérification du prénom
+function checkFirstName() {
+  if (RegexAlpha(firstNameInput.value) == true) {
+    // Si la valeur du bouton est conforme au RegexTxt
+    firstNameInput.style.color = "green";
+    firstNameInput.nextElementSibling.textContent = "";
+    return true;
+  } else {
+    firstNameInput.nextElementSibling.textContent = "Merci d'entrer un prénom conforme. Ex : Jean, Jean-François, Jean François";
+    firstNameInput.style.color = "black";
+    return false;
+  }
+}
+
+firstNameInput.addEventListener("change", () => {
+  checkFirstName(); // Vérification à chaque changement de la condition de validation
+});
+
+//    Vérification du nom
+function checkLastName(e) {
+  if (RegexAlpha(lastNameInput.value) == true) {
+    // Si la valeur du bouton est conforme au RegexTxt
+    lastNameInput.style.color = "green";
+    lastNameInput.nextElementSibling.textContent = "";
+    return true;
+  } else {
+    lastNameInput.nextElementSibling.textContent = "Merci d'entrer un nom conforme. Ex : Dupond, Du-Pond, Du Pond ";
+    lastNameInput.style.color = "black";
+    return false;
+  }
+}
+
+lastNameInput.addEventListener("change", () => {
+  checkLastName(); // Vérification à chaque changement de la condition de validation
+});
+
+//    Vérification de la ville
+function checkCity(e) {
+  if (RegexAlphaNum(cityInput.value) == true) {
+    // Si la valeur du bouton est conforme au RegexTxt
+    cityInput.style.color = "green";
+    cityInput.nextElementSibling.textContent = "";
+    return true;
+  } else {
+    cityInput.nextElementSibling.textContent = "Merci d'entrer une ville conforme. Ex : Lyon, Lyon-V, Lyon 4ème";
+    cityInput.style.color = "black";
+    return false;
+  }
+}
+
+cityInput.addEventListener("change", () => {
+  checkCity(); // Vérification à chaque changement de la condition de validation
+});
+
+//    Vérification de l'adresse
+function checkAddress(e) {
+  if (RegexAlphaNum(addressInput.value) == true) {
+    // Si la valeur du bouton est conforme au RegexTxt
+    addressInput.style.color = "green";
+    addressInput.nextElementSibling.textContent = "";
+    return true;
+  } else {
+    addressInput.nextElementSibling.textContent = "Merci d'entrer une adresse conforme. Ex : 3 Avenue de l'Europe, Rue Albert-Camus ";
+    addressInput.style.color = "black";
+    return false;
+  }
+}
+
+addressInput.addEventListener("change", () => {
+  checkAddress(); // Vérification à chaque changement de la condition de validation
+});
+
+//    Vérification de l'email
+function checkEmail(e) {
+  if (RegexEmail(emailInput.value) == true) {
+    // Si la valeur du bouton est conforme au RegexTxt
+    emailInput.style.color = "green";
+    emailInput.nextElementSibling.textContent = "";
+    return true;
+  } else {
+    emailInput.nextElementSibling.textContent = "Merci d'entrer un courriel conforme. Ex : contact@kanap.com";
+    emailInput.style.color = "black";
+    return false;
+  }
+}
+
+emailInput.addEventListener("change", () => {
+  checkEmail(); // Vérification à chaque changement de la condition de validation
+});
+
+// Création du client
+
+// Au clic sur ce bouton, reprise des valeurs dans les champs du formulaire pour créer un objet contenant les éléments du client quand les formules de validation sont Ok
+btnOrder.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (checkFirstName() == true && checkLastName() == true && checkCity() == true && checkAddress() == true && checkEmail() == true) {
+    let contact = {
+      firstName: firstNameInput.value,
+      lastName: lastNameInput.value,
+      address: addressInput.value,
+      city: cityInput.value,
+      email: emailInput.value,
+    };
+
+    let LocalStorageClient = JSON.parse(localStorage.getItem("contact"));
+    localStorage.setItem("contact", JSON.stringify(contact));
+
+    if (localStorage.products === undefined) {
+      alert("Votre panier est vide, vous retrouverez nos produits sur la page d'Accueil");
+      location.href = "./index.html";
+    } else {
+      PostAPI(contact, products);
+    }
+  } else {
+    alert("Veuillez revoir la saisie du formulaire s'il vous plait");
+  }
+});
+
+function PostAPI(contact, products) {
+  fetch(
+    `http://localhost:3000/api/products/order`,
+
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ contact, products }),
+    }
+  )
+    .then(function (res) {
+      // objet réponse de l'aPI
+      if (res.ok) {
+        // Si on a une réponse
+        return res.json(); // Retourne la réponse en objet json
+      }
+    })
+
+    .then(function (api) {
+      orderId = api.orderId; // Récupère orderId dans la réponse de l'API
+      console.log(orderId);
+      localStorage.clear(); // Vide le local Storage
+      location.href = `./confirmation.html?id=${orderId}`; // Redirige vers la page confirmation avec l'orderId pour pouvoir le récupérer sans le stocker
+    })
+
+    .catch(function (err) {
+      // Une erreur est survenue
+    });
 }
