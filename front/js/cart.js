@@ -1,19 +1,18 @@
-// Objectif : Créer la page récaptitulative du panier avec le total du prix, la possibilité le mettre à jour
+// Objectif : Créer la page récaptitulative du panier avec le total du prix, la possibilité le mettre à jour, saisir le formalaire de contact et récupérer le numéro de la commande
 
 // Besoins :
 
 // A. Récupérer éléments dans HTML
 const itemsHtml = document.getElementById("cart__items");
 
-// B. Vérifier qu'il y qq chose dans le local Storage
-console.log(localStorage.getItem("products")); // Si vide résultat = null, sinon objet JSON
-
-// C. Initialisation de données nécessaires
+// B. Initialisation de données nécessaires
 let totalQuantity = 0; // Sera modifié à chaque produit
 let totalPrice = 0; // Sera modifié à chaque produit
 let products = [];
 
+/////////////////////////////////////////////////////
 if (localStorage.getItem("products") === null) {
+  // Vérifier si il y a quelque chose dans le localStorage
   itemsHtml.innerHTML = `<p>Votre panier est actuellement vide</p>`;
 } else {
   let localStorageCart = JSON.parse(localStorage.getItem("products")); // si le résultat est pas null, construction en objet Javascript
@@ -32,7 +31,7 @@ if (localStorage.getItem("products") === null) {
 
       .then((productAPI) => {
         // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
-        // console.log(productLS);
+
         let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
 
         itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
@@ -63,12 +62,10 @@ if (localStorage.getItem("products") === null) {
                   </article>`;
         //  Cumul de la quantité de produits commandés :
         totalQuantity += productLS.quantity;
-        console.log(totalQuantity);
         document.getElementById("totalQuantity").textContent = `${totalQuantity}`;
 
         //  Cumul de la quantité de produits commandés :
         totalPrice += priceTotalProductSelect;
-        console.log(totalPrice);
         document.getElementById("totalPrice").textContent = `${totalPrice}`;
 
         // Récupère ID du produit à mettre dans un tableau pour passer la requete POST vers l'API
@@ -81,7 +78,7 @@ if (localStorage.getItem("products") === null) {
 
         let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Cible les quantités et renvoi une nodeList qui peut être itéré comme un tableau
 
-        inputsQuantity.forEach((input, key) => {
+        inputsQuantity.forEach((input) => {
           // pour chaque élément=input dans inputsQuantity
 
           input.addEventListener("change", (e) => {
@@ -106,7 +103,7 @@ if (localStorage.getItem("products") === null) {
                 localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi 100 dans le Local Storage
               } else if (articleChanged.quantity <= 0) {
                 articleChanged.quantity = parseInt(e.target.value);
-                debugger;
+
                 localStorage.removeItem("products", JSON.stringify(localStorageCart));
               } else {
                 articleChanged.quantity = parseInt(e.target.value);
@@ -123,16 +120,16 @@ if (localStorage.getItem("products") === null) {
 
         let inputsDelete = document.querySelectorAll(".deleteItem"); // Cible les boutons "Supprimer"
 
-        inputsDelete.forEach((input, key) => {
+        inputsDelete.forEach((input) => {
           // pour chaque élément=input dans inputsDelete
 
           input.addEventListener("click", (e) => {
             let articleHMTL = e.target.closest("article"); // Cible la balise article la plus proche du bouton supprimé
             let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
             let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
-            debugger;
-            localStorageCart = localStorageCart.filter((e) => e.id !== articleHTMLId || e.color !== articleHTMLcolor);
-            console.log(localStorageCart);
+
+            localStorageCart = localStorageCart.filter((e) => !(e.id === articleHTMLId && e.color === articleHTMLcolor));
+
             //Renvoi un tableau filtré avec les critères suivants :
             // - Element doit avoir un id différent de celui trouvé dans HTML
             // OU
@@ -149,7 +146,7 @@ if (localStorage.getItem("products") === null) {
           });
         });
       })
-      .catch(function (err) {
+      .catch(function (_err) {
         // Une erreur est survenue
       });
   });
@@ -182,14 +179,14 @@ function RegexEmail(value) {
 }
 //    Vérification du prénom
 function checkFirstName() {
-  if (RegexAlpha(firstNameInput.value) == true) {
+  if (RegexAlpha(firstNameInput.value)) {
     // Si la valeur du bouton est conforme au RegexTxt
-    firstNameInput.style.color = "green";
+    firstNameInput.style.border = "medium solid #74f774";
     firstNameInput.nextElementSibling.textContent = "";
     return true;
   } else {
     firstNameInput.nextElementSibling.textContent = "Merci d'entrer un prénom conforme. Ex : Jean, Jean-François, Jean François";
-    firstNameInput.style.color = "black";
+    firstNameInput.style.border = "medium solid #f77474";
     return false;
   }
 }
@@ -199,15 +196,15 @@ firstNameInput.addEventListener("change", () => {
 });
 
 //    Vérification du nom
-function checkLastName(e) {
-  if (RegexAlpha(lastNameInput.value) == true) {
+function checkLastName() {
+  if (RegexAlpha(lastNameInput.value)) {
     // Si la valeur du bouton est conforme au RegexTxt
-    lastNameInput.style.color = "green";
+    lastNameInput.style.border = "medium solid #74f774";
     lastNameInput.nextElementSibling.textContent = "";
     return true;
   } else {
     lastNameInput.nextElementSibling.textContent = "Merci d'entrer un nom conforme. Ex : Dupond, Du-Pond, Du Pond ";
-    lastNameInput.style.color = "black";
+    lastNameInput.style.border = "medium solid #f77474";
     return false;
   }
 }
@@ -217,15 +214,15 @@ lastNameInput.addEventListener("change", () => {
 });
 
 //    Vérification de la ville
-function checkCity(e) {
-  if (RegexAlphaNum(cityInput.value) == true) {
+function checkCity() {
+  if (RegexAlphaNum(cityInput.value)) {
     // Si la valeur du bouton est conforme au RegexTxt
-    cityInput.style.color = "green";
+    cityInput.style.border = "medium solid #74f774";
     cityInput.nextElementSibling.textContent = "";
     return true;
   } else {
     cityInput.nextElementSibling.textContent = "Merci d'entrer une ville conforme. Ex : Lyon, Lyon-V, Lyon 4ème";
-    cityInput.style.color = "black";
+    cityInput.style.border = "medium solid #f77474";
     return false;
   }
 }
@@ -235,15 +232,15 @@ cityInput.addEventListener("change", () => {
 });
 
 //    Vérification de l'adresse
-function checkAddress(e) {
-  if (RegexAlphaNum(addressInput.value) == true) {
+function checkAddress() {
+  if (RegexAlphaNum(addressInput.value)) {
     // Si la valeur du bouton est conforme au RegexTxt
-    addressInput.style.color = "green";
+    addressInput.style.border = "medium solid #74f774";
     addressInput.nextElementSibling.textContent = "";
     return true;
   } else {
     addressInput.nextElementSibling.textContent = "Merci d'entrer une adresse conforme. Ex : 3 Avenue de l'Europe, Rue Albert-Camus ";
-    addressInput.style.color = "black";
+    addressInput.style.border = "medium solid #f77474";
     return false;
   }
 }
@@ -253,21 +250,21 @@ addressInput.addEventListener("change", () => {
 });
 
 //    Vérification de l'email
-function checkEmail(e) {
-  if (RegexEmail(emailInput.value) == true) {
+function checkEmail() {
+  if (RegexEmail(emailInput.value)) {
     // Si la valeur du bouton est conforme au RegexTxt
-    emailInput.style.color = "green";
+    emailInput.style.border = "medium solid #74f774";
     emailInput.nextElementSibling.textContent = "";
     return true;
   } else {
     emailInput.nextElementSibling.textContent = "Merci d'entrer un courriel conforme. Ex : contact@kanap.com";
-    emailInput.style.color = "black";
+    emailInput.style.border = "medium solid #f77474";
     return false;
   }
 }
 
 emailInput.addEventListener("change", () => {
-  checkEmail(); // Vérification à chaque changement de la condition de validation
+  checkEmail();
 });
 
 // Création du client
@@ -276,7 +273,7 @@ emailInput.addEventListener("change", () => {
 btnOrder.addEventListener("click", (e) => {
   e.preventDefault();
 
-  if (checkFirstName() == true && checkLastName() == true && checkCity() == true && checkAddress() == true && checkEmail() == true) {
+  if (checkFirstName() && checkLastName() && checkCity() && checkAddress() && checkEmail()) {
     let contact = {
       firstName: firstNameInput.value,
       lastName: lastNameInput.value,
@@ -285,7 +282,6 @@ btnOrder.addEventListener("click", (e) => {
       email: emailInput.value,
     };
 
-    let LocalStorageClient = JSON.parse(localStorage.getItem("contact"));
     localStorage.setItem("contact", JSON.stringify(contact));
 
     if (localStorage.products === undefined) {
@@ -322,12 +318,11 @@ function PostAPI(contact, products) {
 
     .then(function (api) {
       orderId = api.orderId; // Récupère orderId dans la réponse de l'API
-      console.log(orderId);
       localStorage.clear(); // Vide le local Storage
       location.href = `./confirmation.html?id=${orderId}`; // Redirige vers la page confirmation avec l'orderId pour pouvoir le récupérer sans le stocker
     })
 
-    .catch(function (err) {
+    .catch(function (_err) {
       // Une erreur est survenue
     });
 }

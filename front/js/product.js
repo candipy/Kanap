@@ -8,9 +8,6 @@ const url = new URL(location.href);
 //2) Recherche dans l'url le paramètre de l'ID
 const idProduct = url.searchParams.get("id");
 
-// Vérification dans la console
-console.log("Id du produit selectionné sur la page index : ", idProduct);
-
 // B. Intérroger l'API avec l'ID qui est maintenant présent
 const productsAPIId = `http://localhost:3000/api/products/${idProduct}`;
 
@@ -22,9 +19,8 @@ fetch(productsAPIId)
   })
 
   .then((product) => {
-    console.log("Elements trouvés dans l'API pour le produit : ", product);
     addHTML(product);
-    addCart(product);
+    addCart();
   })
 
   .catch(function (err) {
@@ -60,7 +56,6 @@ function addHTML(product) {
   // Pour chaque couleur dans product, création d'une nouvelle entrée value
   for (let color of product.colors) {
     // Pour chaque color dans colors de products provennant de l'API
-    console.log("Coloris disponibles : ", color);
     // ajouter à couleur (selectionné par id) dans HTML de l'option {color}
     colorsHTML.innerHTML += `<option value="${color}">${color}</option>`;
   }
@@ -68,20 +63,16 @@ function addHTML(product) {
 
 // Fonction qui récupère les données de la promise .then(product) et qui permet de récupérer l'article et de l'ajouter au local storage
 
-function addCart(product) {
+function addCart() {
   // Ecouter le click sur le bouton "ajouter au panier" dans HTML = va lancer la fonction à chaque click
   const buttonHTML = document.getElementById("addToCart");
-  buttonHTML.addEventListener("click", function (product) {
+  buttonHTML.addEventListener("click", function () {
     // Récupèrer les valeurs nécessaires couleur, quantité, id
     const colorsHTML = document.getElementById("colors");
     let colorsSelect = colorsHTML.value;
-    console.log("Coloris selectionné : ", colorsSelect);
 
     const quantityHTML = document.getElementById("quantity");
     let quantitySelect = quantityHTML.value;
-    console.log("Quantité selectionnée : ", quantitySelect);
-
-    console.log("Rappel de l'id du produit : ", idProduct);
 
     // Conditions de commande pour l'utilisateur :
     // - Il doit selectionner une couleur
@@ -108,7 +99,7 @@ function addCart(product) {
       // Création d'une variable qui interroge le localStorage en object Javascript
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
-      console.log(localStorageCart);
+
       // Permet de cibler le paragraphe qui sera modifié quand ajoute des produits
       const divPQuantityHtml = document.querySelector(".item__content__settings > p");
 
@@ -153,7 +144,7 @@ function addCart(product) {
       } else {
         // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
         let cart = []; // Création d'un tableau vide à chaque click
-        console.log(cart);
+
         cart.push(productSelect); // Ajout à ce tableau du produit selectionné
 
         if (productSelect.quantity == 1) {

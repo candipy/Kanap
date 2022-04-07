@@ -5,11 +5,9 @@ const url = new URL(location.href);
 
 //Recherche dans l'url le paramètre de l'orderId
 const orderIdURL = url.searchParams.get("id");
-console.log(orderIdURL);
 
 // Cibler l'id dans HTML
 const orderIdHTML = document.getElementById("orderId");
-console.log(orderIdHTML);
 
 // Ajouter l'orderId trouvé dans l'URL et l'afficher sur la page
 orderIdHTML.innerText = orderIdURL;
