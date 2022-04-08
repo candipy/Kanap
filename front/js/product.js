@@ -8,6 +8,11 @@ const url = new URL(location.href);
 //2) Recherche dans l'url le paramètre de l'ID
 const idProduct = url.searchParams.get("id");
 
+// Elements nécessaires pour informer l'utilsateur des produits ajoutés au panier :
+let newAlert = document.createElement("p");
+let itemcontentHtml = document.querySelector(".item__content");
+itemcontentHtml.appendChild(newAlert);
+
 // B. Intérroger l'API avec l'ID qui est maintenant présent
 const productsAPIId = `http://localhost:3000/api/products/${idProduct}`;
 
@@ -24,12 +29,16 @@ fetch(productsAPIId)
   })
 
   .catch(function (err) {
-    // Une erreur est survenue
+    console.error(err);
+    let newAlert = document.createElement("p");
+    newAlert.style.color = "#501717";
+    newAlert.innerText = "Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard";
+    document.querySelector(".item").replaceChild(newAlert, document.querySelector("article"));
   });
 
-// Fonction qui récupère les données de la promise .then(product) pour insérer les éléments dans HTML
+// Fonction qui récupère les données de la promise .then(product) pour insérer les éléments dans le DOM
 function addHTML(product) {
-  const imageHTML = document.querySelector(".item__img"); // Récupère la class item img dans HTML
+  const imageHTML = document.querySelector(".item__img");
   // image.innerHTML= `<img src="${product.imageUrl}" alt="${product.altTxt}" />` // Insère l'url de l'image et son alt - Autre possibilité
   let newImageHTML = document.createElement("img");
   // Création d'une balise <img>
@@ -38,7 +47,7 @@ function addHTML(product) {
   newImageHTML.alt = product.altTxt;
   // Ajout du alt texte à cette balise img
   imageHTML.appendChild(newImageHTML);
-  // Rattachement en tant qu'enfant de newImage à image précédemment récupéré par sa class dans HTML
+  // Rattachement en tant qu'enfant de newImage à image précédemment récupéré par sa class dans le DOM
 
   const titlePageHTML = document.querySelector("title"); // Récupère la balise title dans HTML
   titlePageHTML.innerText = product.name; // Insère nom du produit trouvé dans l'API
@@ -66,6 +75,7 @@ function addHTML(product) {
 function addCart() {
   // Ecouter le click sur le bouton "ajouter au panier" dans HTML = va lancer la fonction à chaque click
   const buttonHTML = document.getElementById("addToCart");
+
   buttonHTML.addEventListener("click", function () {
     // Récupèrer les valeurs nécessaires couleur, quantité, id
     const colorsHTML = document.getElementById("colors");
@@ -79,7 +89,8 @@ function addCart() {
     // - Il doit saisir une quantité supérieur à 0 et inférieure à 100
 
     if (colorsSelect == "" || quantitySelect <= 0 || quantitySelect > 100) {
-      alert("Pour ajouter l'article souhaité, veuillez selectionner une couleur valide et une quantité comprise entre 1 et 100");
+      newAlert.style.color = "#501717";
+      newAlert.innerText = "Pour ajouter l'article souhaité, veuillez selectionner une couleur valide et une quantité comprise entre 1 et 100";
 
       //  Conditions pour que l'article s'ajoute dans le panier :
       // Vérifier si le local storage contient quelque chose
@@ -96,12 +107,10 @@ function addCart() {
         id: idProduct,
       };
 
+      newAlert.style.color = "inherit";
       // Création d'une variable qui interroge le localStorage en object Javascript
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
-
-      // Permet de cibler le paragraphe qui sera modifié quand ajoute des produits
-      const divPQuantityHtml = document.querySelector(".item__content__settings > p");
 
       if (localStorageCart !== null) {
         // Cherche dans chaque objet de localStorageCart et vérifie si identique id + color trouvé dans productSelect
@@ -118,15 +127,16 @@ function addCart() {
           if (productAlreadyOrdered.quantity > 100) {
             // Si la quantité dépasse 100
             productAlreadyOrdered.quantity = 100;
-            divPQuantityHtml.innerText = `Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée à ${productAlreadyOrdered.quantity} exemplaires de cet article`;
+            newAlert.style.color = "#501717";
+            newAlert.innerText = `Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée à ${productAlreadyOrdered.quantity} exemplaires de cet article`;
             localStorage.setItem("products", JSON.stringify(localStorageCart));
           } else {
             // Si la quantité ne dépasse pas 100
             localStorage.setItem("products", JSON.stringify(localStorageCart));
             if (productSelect.quantity == 1) {
-              divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
             } else {
-              divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
             }
           }
         } else {
@@ -134,9 +144,9 @@ function addCart() {
           localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
 
           if (productSelect.quantity == 1) {
-            divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+            newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
           } else {
-            divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient ${productSelect.quantity}`;
+            newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient ${productSelect.quantity}`;
           }
 
           localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
@@ -148,9 +158,9 @@ function addCart() {
         cart.push(productSelect); // Ajout à ce tableau du produit selectionné
 
         if (productSelect.quantity == 1) {
-          divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
         } else {
-          divPQuantityHtml.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
         }
 
         localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères

@@ -1,21 +1,20 @@
 // Objectif : Créer la page récaptitulative du panier avec le total du prix, la possibilité le mettre à jour, saisir le formalaire de contact et récupérer le numéro de la commande
 
-// Besoins :
-
-// A. Récupérer éléments dans HTML
+// Besoins permanents
 const itemsHtml = document.getElementById("cart__items");
 
-// B. Initialisation de données nécessaires
-let totalQuantity = 0; // Sera modifié à chaque produit
-let totalPrice = 0; // Sera modifié à chaque produit
 let products = [];
 
 /////////////////////////////////////////////////////
 if (localStorage.getItem("products") === null) {
   // Vérifier si il y a quelque chose dans le localStorage
   itemsHtml.innerHTML = `<p>Votre panier est actuellement vide</p>`;
+  itemsHtml.style.color = "#501717";
 } else {
+  // ----- Gestion du panier-----
   let localStorageCart = JSON.parse(localStorage.getItem("products")); // si le résultat est pas null, construction en objet Javascript
+  let totalQuantity = 0; // Sera modifié à chaque produit
+  let totalPrice = 0; // Sera modifié à chaque produit
 
   localStorageCart.forEach((productLS) => {
     // Pour chaque produit dans le local Storage récupérer son id
@@ -30,7 +29,7 @@ if (localStorage.getItem("products") === null) {
       })
 
       .then((productAPI) => {
-        // Afficher les produits de l'API selectionnés par rapport à l'ID récupéré dans le local Storage
+        // ----- Affichage du panier-----
 
         let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
 
@@ -74,7 +73,7 @@ if (localStorage.getItem("products") === null) {
         return productAPI;
       })
       .then(() => {
-        // Modification de la quantité
+        // ----- Modification de la quantité ----
 
         let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Cible les quantités et renvoi une nodeList qui peut être itéré comme un tableau
 
@@ -100,15 +99,23 @@ if (localStorage.getItem("products") === null) {
                 alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
                 e.target.value = 100;
                 articleChanged.quantity = parseInt(e.target.value);
-                localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi 100 dans le Local Storage
+                localStorage.setItem("products", JSON.stringify(localStorageCart));
               } else if (articleChanged.quantity <= 0) {
                 articleChanged.quantity = parseInt(e.target.value);
+                localStorageCart = localStorageCart.filter((e) => !(e.id === articleHTMLId && e.color === articleHTMLcolor));
+                articleHMTL.remove();
+                localStorage.setItem("products", JSON.stringify(localStorageCart));
 
-                localStorage.removeItem("products", JSON.stringify(localStorageCart));
+                if (localStorageCart.length < 1) {
+                  localStorage.clear("products");
+                }
               } else {
                 articleChanged.quantity = parseInt(e.target.value);
                 localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi dans le localStorage de la nouvelle quantité
               }
+            } else {
+              localStorage.clear("products");
+              alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
             }
             location.reload();
           });
@@ -116,7 +123,7 @@ if (localStorage.getItem("products") === null) {
       })
 
       .then(() => {
-        // Suppression d'un article
+        // ----- Suppression d'un article ----
 
         let inputsDelete = document.querySelectorAll(".deleteItem"); // Cible les boutons "Supprimer"
 
@@ -129,25 +136,33 @@ if (localStorage.getItem("products") === null) {
             let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
 
             localStorageCart = localStorageCart.filter((e) => !(e.id === articleHTMLId && e.color === articleHTMLcolor));
+            console.log(localStorageCart);
 
-            //Renvoi un tableau filtré avec les critères suivants :
-            // - Element doit avoir un id différent de celui trouvé dans HTML
-            // OU
-            // - Element doit avoir une couleur différentes de celle trouvée dans HTML
-            // => Soit un tableau sans l'élément du correspondant au bouton cliqué 'supprimer'
-
-            articleHMTL.remove(); // Suppression de la balise article correspondante
-            localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement du localStrageCart filtré
-
-            if (localStorageCart.length < 0) {
+            if (localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor)) {
               localStorage.clear("products");
+              alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+            } else {
+              //Renvoi un tableau filtré avec les critères DIFFERENT de  :
+              // - Element doit avoir un id identique de celui trouvé dans DOM
+              // ET
+              // - Element doit avoir une couleur identique de celle trouvée dans le DOM
+              // => Soit un tableau sans l'élément du correspondant au bouton cliqué 'supprimer'
+
+              articleHMTL.remove(); // Suppression de la balise article correspondante
+              localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement du localStrageCart filtré
+
+              if (localStorageCart.length < 1) {
+                localStorage.clear("products");
+              }
             }
             location.reload();
           });
         });
       })
-      .catch(function (_err) {
-        // Une erreur est survenue
+      .catch(function (err) {
+        console.error(err);
+        itemsHtml.innerHTML = `<p>Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard</p>`;
+        itemsHtml.style.color = "#501717";
       });
   });
 }
@@ -292,6 +307,11 @@ btnOrder.addEventListener("click", (e) => {
     }
   } else {
     alert("Veuillez revoir la saisie du formulaire s'il vous plait");
+    checkFirstName();
+    checkLastName();
+    checkCity();
+    checkAddress();
+    checkEmail();
   }
 });
 
@@ -317,12 +337,13 @@ function PostAPI(contact, products) {
     })
 
     .then(function (api) {
-      orderId = api.orderId; // Récupère orderId dans la réponse de l'API
-      localStorage.clear(); // Vide le local Storage
-      location.href = `./confirmation.html?id=${orderId}`; // Redirige vers la page confirmation avec l'orderId pour pouvoir le récupérer sans le stocker
+      location.href = `./confirmation.html?id=${api.orderId}`; // Redirige vers la page confirmation avec l'orderId pour pouvoir le récupérer sans le stocker
     })
 
-    .catch(function (_err) {
-      // Une erreur est survenue
+    .catch(function (err) {
+      console.error(err);
+      localStorage.clear();
+      alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+      location.href = "./index.html";
     });
 }

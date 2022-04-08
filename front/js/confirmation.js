@@ -10,4 +10,12 @@ const orderIdURL = url.searchParams.get("id");
 const orderIdHTML = document.getElementById("orderId");
 
 // Ajouter l'orderId trouvé dans l'URL et l'afficher sur la page
-orderIdHTML.innerText = orderIdURL;
+
+if (orderIdURL !== null) {
+  orderIdHTML.innerText = orderIdURL;
+  localStorage.clear();
+} else {
+  let confirmation = document.querySelector(".confirmation>p");
+  console.log(confirmation.textContent);
+  confirmation.textContent = "Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard";
+}

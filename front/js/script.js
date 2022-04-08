@@ -18,7 +18,7 @@ fetch(productsAPI)
 
   .then(function (products) {
     for (let product of products) {
-      itemsHtml.innerHTML += `<a href="./product.html?id=${product._id}"> 
+      itemsHtml.innerHTML += `<a href="./product.html?id=${product._id}">
       <article>
         <img src="${product.imageUrl}" alt="${product.altTxt}" />
         <h3 class="productName">${product.name}</h3>
@@ -29,4 +29,8 @@ fetch(productsAPI)
   })
   .catch(function (err) {
     console.error(err);
+    let alert = document.createElement("p");
+    alert.style.color = "#501717";
+    alert.innerText = "Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard";
+    itemsHtml.appendChild(alert);
   });
