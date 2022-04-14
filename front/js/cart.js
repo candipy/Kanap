@@ -1,4 +1,4 @@
-// Objectif : Créer la page récaptitulative du panier avec le total du prix, la possibilité le mettre à jour, saisir le formalaire de contact et récupérer le numéro de la commande
+// Objectif : Créer la page récaptitulative du panier avec le total du prix, la possibilité le mettre à jour, saisir le formulaire de contact et récupérer le numéro de la commande
 
 // Besoins permanents
 const itemsHtml = document.getElementById("cart__items");
@@ -19,7 +19,7 @@ if (localStorage.getItem("products") === null) {
   localStorageCart.forEach((productLS) => {
     // Pour chaque produit dans le local Storage récupérer son id
 
-    fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage = envoi un requete
+    fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage
       .then(function (res) {
         if (res.ok) {
           return res.json();
@@ -271,7 +271,7 @@ btnOrder.addEventListener("click", (e) => {
     //localStorage.setItem("contact", JSON.stringify(contact));
 
     if (localStorage.products === undefined) {
-      alert("Votre panier est vide, vous retrouverez nos produits sur la page d'Accueil");
+      alert("Votre panier est vide, retrouvez nos produits sur la page d'Accueil");
       location.href = "./index.html";
     } else {
       PostAPI(contact, products);
