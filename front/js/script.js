@@ -4,7 +4,7 @@
 
 // Elements de l'API
 const productsAPI = "http://localhost:3000/api/products/";
-// ID items dans HTML
+// ID items dans le DOM
 const itemsHtml = document.getElementById("items");
 
 //Récupération des données de l'API et insertion dans le DOM
@@ -28,9 +28,8 @@ fetch(productsAPI)
     }
   })
   .catch(function (err) {
-    console.error(err);
     let alert = document.createElement("p");
     alert.style.color = "#501717";
-    alert.innerText = "Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard";
+    alert.innerText = "Nous sommes désolés mais une erreur s'est produite, veuillez réessayer plus tard";
     itemsHtml.appendChild(alert);
   });

@@ -16,6 +16,5 @@ if (orderIdURL !== null) {
   localStorage.clear();
 } else {
   let confirmation = document.querySelector(".confirmation>p");
-  console.log(confirmation.textContent);
-  confirmation.textContent = "Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard";
+  confirmation.textContent = "Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard";
 }

@@ -12,26 +12,24 @@ if (localStorage.getItem("products") === null) {
   itemsHtml.style.color = "#501717";
 } else {
   // ----- Gestion du panier-----
-  let localStorageCart = JSON.parse(localStorage.getItem("products")); // si le résultat est pas null, construction en objet Javascript
-  let totalQuantity = 0; // Sera modifié à chaque produit
-  let totalPrice = 0; // Sera modifié à chaque produit
+  let localStorageCart = JSON.parse(localStorage.getItem("products"));
+  let totalQuantity = 0;
+  let totalPrice = 0;
 
   localStorageCart.forEach((productLS) => {
     // Pour chaque produit dans le local Storage récupérer son id
 
     fetch(`http://localhost:3000/api/products/${productLS.id}`) // Requete à l'API de l'ID récupéré dans le local Storage = envoi un requete
       .then(function (res) {
-        // objet réponse de l'aPI
         if (res.ok) {
-          // Si on a une réponse
-          return res.json(); // Retourne la réponse en objet json
+          return res.json();
         }
       })
 
       .then((productAPI) => {
         // ----- Affichage du panier-----
 
-        let priceTotalProductSelect = productAPI.price * productLS.quantity; // Variable pour le prix total d'un produit
+        let priceTotalProductSelect = productAPI.price * productLS.quantity; //  Prix total d'un produit
 
         itemsHtml.innerHTML += `<article class="cart__item" data-id="${productLS.id}" data-color="${productLS.color}">
                     <div class="cart__item__img">
@@ -59,41 +57,32 @@ if (localStorage.getItem("products") === null) {
                       </div>
                     </div>
                   </article>`;
-        //  Cumul de la quantité de produits commandés :
+        //  Nombre de produits commandés :
         totalQuantity += productLS.quantity;
         document.getElementById("totalQuantity").textContent = `${totalQuantity}`;
 
-        //  Cumul de la quantité de produits commandés :
+        //  Prix des produits commandés :
         totalPrice += priceTotalProductSelect;
         document.getElementById("totalPrice").textContent = `${totalPrice}`;
 
         // Récupère ID du produit à mettre dans un tableau pour passer la requete POST vers l'API
         products.push(productLS.id);
-
-        return productAPI;
       })
       .then(() => {
         // ----- Modification de la quantité ----
 
-        let inputsQuantity = document.querySelectorAll(".itemQuantity"); // Cible les quantités et renvoi une nodeList qui peut être itéré comme un tableau
+        let inputsQuantity = document.querySelectorAll(".itemQuantity");
 
         inputsQuantity.forEach((input) => {
-          // pour chaque élément=input dans inputsQuantity
-
           input.addEventListener("change", (e) => {
-            let articleHMTL = e.target.closest("article"); // Cibler la balise Article la plus proche de la quantité modifiée
-            let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
-            let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
+            let articleHMTL = e.target.closest("article");
+            let articleHTMLId = articleHMTL.dataset.id;
+            let articleHTMLcolor = articleHMTL.dataset.color;
+            // Trouver le premier article dans le local storage qui respecte la condition
             let articleChanged = localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor);
-            // Trouver le premier article (findArticle) dans le local storage qui respecte la condition suivante :
-            // - ID dans le localStorage = Id trouvé dans la la balise article
-            // ET
-            // - Couleur dans le localStorage = couleur trouvée dans la balise article
 
             if (articleChanged !== undefined) {
-              // Si findArticle n'est pas undefined (réponse de .find)
-
-              articleChanged.quantity = parseInt(e.target.value); // la quantité trouvé dans le localStorage devient la nouvelle quantité, en nombre // Cibler la value du itemsQuantity changé
+              articleChanged.quantity = parseInt(e.target.value);
 
               if (articleChanged.quantity > 100) {
                 alert("Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée 100");
@@ -101,7 +90,6 @@ if (localStorage.getItem("products") === null) {
                 articleChanged.quantity = parseInt(e.target.value);
                 localStorage.setItem("products", JSON.stringify(localStorageCart));
               } else if (articleChanged.quantity <= 0) {
-                articleChanged.quantity = parseInt(e.target.value);
                 localStorageCart = localStorageCart.filter((e) => !(e.id === articleHTMLId && e.color === articleHTMLcolor));
                 articleHMTL.remove();
                 localStorage.setItem("products", JSON.stringify(localStorageCart));
@@ -110,12 +98,11 @@ if (localStorage.getItem("products") === null) {
                   localStorage.clear("products");
                 }
               } else {
-                articleChanged.quantity = parseInt(e.target.value);
-                localStorage.setItem("products", JSON.stringify(localStorageCart)); // Envoi dans le localStorage de la nouvelle quantité
+                localStorage.setItem("products", JSON.stringify(localStorageCart));
               }
             } else {
               localStorage.clear("products");
-              alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+              alert("Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
             }
             location.reload();
           });
@@ -125,31 +112,22 @@ if (localStorage.getItem("products") === null) {
       .then(() => {
         // ----- Suppression d'un article ----
 
-        let inputsDelete = document.querySelectorAll(".deleteItem"); // Cible les boutons "Supprimer"
+        let inputsDelete = document.querySelectorAll(".deleteItem");
 
         inputsDelete.forEach((input) => {
-          // pour chaque élément=input dans inputsDelete
-
           input.addEventListener("click", (e) => {
-            let articleHMTL = e.target.closest("article"); // Cible la balise article la plus proche du bouton supprimé
-            let articleHTMLId = articleHMTL.dataset.id; // Cibler son attribut data-id
-            let articleHTMLcolor = articleHMTL.dataset.color; // Cibler son attribut data color
+            let articleHMTL = e.target.closest("article");
+            let articleHTMLId = articleHMTL.dataset.id;
+            let articleHTMLcolor = articleHMTL.dataset.color;
 
             localStorageCart = localStorageCart.filter((e) => !(e.id === articleHTMLId && e.color === articleHTMLcolor));
-            console.log(localStorageCart);
 
             if (localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor)) {
               localStorage.clear("products");
-              alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+              alert("Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
             } else {
-              //Renvoi un tableau filtré avec les critères DIFFERENT de  :
-              // - Element doit avoir un id identique de celui trouvé dans DOM
-              // ET
-              // - Element doit avoir une couleur identique de celle trouvée dans le DOM
-              // => Soit un tableau sans l'élément du correspondant au bouton cliqué 'supprimer'
-
-              articleHMTL.remove(); // Suppression de la balise article correspondante
-              localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement du localStrageCart filtré
+              articleHMTL.remove();
+              localStorage.setItem("products", JSON.stringify(localStorageCart));
 
               if (localStorageCart.length < 1) {
                 localStorage.clear("products");
@@ -160,8 +138,7 @@ if (localStorage.getItem("products") === null) {
         });
       })
       .catch(function (err) {
-        console.error(err);
-        itemsHtml.innerHTML = `<p>Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard</p>`;
+        itemsHtml.innerHTML = `<p>Nous sommes désolés mais une erreur s'est produite, veuillez réessayer plus tard</p>`;
         itemsHtml.style.color = "#501717";
       });
   });
@@ -195,7 +172,6 @@ function RegexEmail(value) {
 //    Vérification du prénom
 function checkFirstName() {
   if (RegexAlpha(firstNameInput.value)) {
-    // Si la valeur du bouton est conforme au RegexTxt
     firstNameInput.style.border = "medium solid #74f774";
     firstNameInput.nextElementSibling.textContent = "";
     return true;
@@ -207,13 +183,12 @@ function checkFirstName() {
 }
 
 firstNameInput.addEventListener("change", () => {
-  checkFirstName(); // Vérification à chaque changement de la condition de validation
+  checkFirstName();
 });
 
 //    Vérification du nom
 function checkLastName() {
   if (RegexAlpha(lastNameInput.value)) {
-    // Si la valeur du bouton est conforme au RegexTxt
     lastNameInput.style.border = "medium solid #74f774";
     lastNameInput.nextElementSibling.textContent = "";
     return true;
@@ -225,13 +200,12 @@ function checkLastName() {
 }
 
 lastNameInput.addEventListener("change", () => {
-  checkLastName(); // Vérification à chaque changement de la condition de validation
+  checkLastName();
 });
 
 //    Vérification de la ville
 function checkCity() {
   if (RegexAlphaNum(cityInput.value)) {
-    // Si la valeur du bouton est conforme au RegexTxt
     cityInput.style.border = "medium solid #74f774";
     cityInput.nextElementSibling.textContent = "";
     return true;
@@ -243,13 +217,12 @@ function checkCity() {
 }
 
 cityInput.addEventListener("change", () => {
-  checkCity(); // Vérification à chaque changement de la condition de validation
+  checkCity();
 });
 
 //    Vérification de l'adresse
 function checkAddress() {
   if (RegexAlphaNum(addressInput.value)) {
-    // Si la valeur du bouton est conforme au RegexTxt
     addressInput.style.border = "medium solid #74f774";
     addressInput.nextElementSibling.textContent = "";
     return true;
@@ -261,13 +234,12 @@ function checkAddress() {
 }
 
 addressInput.addEventListener("change", () => {
-  checkAddress(); // Vérification à chaque changement de la condition de validation
+  checkAddress();
 });
 
 //    Vérification de l'email
 function checkEmail() {
   if (RegexEmail(emailInput.value)) {
-    // Si la valeur du bouton est conforme au RegexTxt
     emailInput.style.border = "medium solid #74f774";
     emailInput.nextElementSibling.textContent = "";
     return true;
@@ -284,7 +256,6 @@ emailInput.addEventListener("change", () => {
 
 // Création du client
 
-// Au clic sur ce bouton, reprise des valeurs dans les champs du formulaire pour créer un objet contenant les éléments du client quand les formules de validation sont Ok
 btnOrder.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -297,7 +268,7 @@ btnOrder.addEventListener("click", (e) => {
       email: emailInput.value,
     };
 
-    localStorage.setItem("contact", JSON.stringify(contact));
+    //localStorage.setItem("contact", JSON.stringify(contact));
 
     if (localStorage.products === undefined) {
       alert("Votre panier est vide, vous retrouverez nos produits sur la page d'Accueil");
@@ -315,6 +286,7 @@ btnOrder.addEventListener("click", (e) => {
   }
 });
 
+// Envoi à l'API du client et des produits + récupération du numéro de commande
 function PostAPI(contact, products) {
   fetch(
     `http://localhost:3000/api/products/order`,
@@ -329,10 +301,8 @@ function PostAPI(contact, products) {
     }
   )
     .then(function (res) {
-      // objet réponse de l'aPI
       if (res.ok) {
-        // Si on a une réponse
-        return res.json(); // Retourne la réponse en objet json
+        return res.json();
       }
     })
 
@@ -341,9 +311,7 @@ function PostAPI(contact, products) {
     })
 
     .catch(function (err) {
-      console.error(err);
-      localStorage.clear();
-      alert("Nous sommes désolé mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+      alert("Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
       location.href = "./index.html";
     });
 }

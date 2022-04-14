@@ -1,4 +1,4 @@
-// Objectif : Ajouter les éléments du produit cliqué dans la page d'acceuil
+// Objectif : Ajouter les éléments du produit cliqué dans la page d'accueil et de l'ajouter au panier
 
 // Besoins
 // A. Récupérer l'id id ayant été cliqué sur la page d'accueil
@@ -8,7 +8,7 @@ const url = new URL(location.href);
 //2) Recherche dans l'url le paramètre de l'ID
 const idProduct = url.searchParams.get("id");
 
-// Elements nécessaires pour informer l'utilsateur des produits ajoutés au panier :
+// Elements nécessaires pour informer l'utilisateur des produits ajoutés au panier :
 let newAlert = document.createElement("p");
 let itemcontentHtml = document.querySelector(".item__content");
 itemcontentHtml.appendChild(newAlert);
@@ -32,116 +32,98 @@ fetch(productsAPIId)
     console.error(err);
     let newAlert = document.createElement("p");
     newAlert.style.color = "#501717";
-    newAlert.innerText = "Nous sommes désolé mais une erreur s'est produite, veuillez réessayer plus tard";
+    newAlert.innerText = "Nous sommes désolés mais une erreur s'est produite, veuillez réessayer plus tard";
     document.querySelector(".item").replaceChild(newAlert, document.querySelector("article"));
   });
 
-// Fonction qui récupère les données de la promise .then(product) pour insérer les éléments dans le DOM
+// -----Affichage du produit-----
+
 function addHTML(product) {
+  // Image
   const imageHTML = document.querySelector(".item__img");
-  // image.innerHTML= `<img src="${product.imageUrl}" alt="${product.altTxt}" />` // Insère l'url de l'image et son alt - Autre possibilité
   let newImageHTML = document.createElement("img");
-  // Création d'une balise <img>
   newImageHTML.src = product.imageUrl;
-  // Ajout du lien src à cette balise img
   newImageHTML.alt = product.altTxt;
-  // Ajout du alt texte à cette balise img
   imageHTML.appendChild(newImageHTML);
-  // Rattachement en tant qu'enfant de newImage à image précédemment récupéré par sa class dans le DOM
 
-  const titlePageHTML = document.querySelector("title"); // Récupère la balise title dans HTML
-  titlePageHTML.innerText = product.name; // Insère nom du produit trouvé dans l'API
+  // Titre
+  const titlePageHTML = document.querySelector("title");
+  titlePageHTML.innerText = product.name;
 
-  const titleHTML = document.getElementById("title"); // Recupere id Title dans HTML
-  titleHTML.innerText = product.name; //Insére le nom du produit trouvé dans l'API
+  const titleHTML = document.getElementById("title");
+  titleHTML.innerText = product.name;
 
-  const priceHTML = document.getElementById("price"); // Récupère id price dans HTML
-  priceHTML.innerText = product.price; // Insére le prix trouvé dans l'API
+  // Prix
+  const priceHTML = document.getElementById("price");
+  priceHTML.innerText = product.price;
 
-  const descriptionHTML = document.getElementById("description"); // Récupère id descrption dans HTML
-  descriptionHTML.innerText = product.description; // Insére le texte de la description trouvé dans l'API
+  // Description
+  const descriptionHTML = document.getElementById("description");
+  descriptionHTML.innerText = product.description;
 
-  let colorsHTML = document.getElementById("colors"); // Récupère id colors dans HTML
-  // Pour chaque couleur dans product, création d'une nouvelle entrée value
+  // Couleur
+  let colorsHTML = document.getElementById("colors");
   for (let color of product.colors) {
-    // Pour chaque color dans colors de products provennant de l'API
-    // ajouter à couleur (selectionné par id) dans HTML de l'option {color}
     colorsHTML.innerHTML += `<option value="${color}">${color}</option>`;
   }
 }
 
-// Fonction qui récupère les données de la promise .then(product) et qui permet de récupérer l'article et de l'ajouter au local storage
+// -----Ajout au panier-----
 
 function addCart() {
-  // Ecouter le click sur le bouton "ajouter au panier" dans HTML = va lancer la fonction à chaque click
   const buttonHTML = document.getElementById("addToCart");
 
   buttonHTML.addEventListener("click", function () {
-    // Récupèrer les valeurs nécessaires couleur, quantité, id
+    // Conditions de commande pour l'utilisateur :
+    // - Il doit selectionner une couleur
+    // - Il doit saisir une quantité supérieur à 0 et inférieure à 100
+
     const colorsHTML = document.getElementById("colors");
     let colorsSelect = colorsHTML.value;
 
     const quantityHTML = document.getElementById("quantity");
     let quantitySelect = quantityHTML.value;
 
-    // Conditions de commande pour l'utilisateur :
-    // - Il doit selectionner une couleur
-    // - Il doit saisir une quantité supérieur à 0 et inférieure à 100
-
     if (colorsSelect == "" || quantitySelect <= 0 || quantitySelect > 100) {
       newAlert.style.color = "#501717";
       newAlert.innerText = "Pour ajouter l'article souhaité, veuillez selectionner une couleur valide et une quantité comprise entre 1 et 100";
 
-      //  Conditions pour que l'article s'ajoute dans le panier :
-      // Vérifier si le local storage contient quelque chose
-      //
-      //      Si le locale Storage contient déjà quelque chose
-      //              Si il y a un article dont la couleur et id sont identiques => Ajoute la quantité à celle déjà présente sans dépasser la quantité de 100
-      //              Si il y a un article dont l'id et ou couleur différent => Ajoute de l'article
-      //        Sinon ajout de l'article
+      // Si la selection de l'utilisateur est conforme :
     } else {
-      // Création d'un objet avec les éléments selectionnés par le client
+      // objet : Selection de l'utilisateur
       let productSelect = {
         color: colorsSelect,
-        quantity: Number(quantitySelect), // Pour additionner les quantité, transformation en nombres
+        quantity: Number(quantitySelect),
         id: idProduct,
       };
 
       newAlert.style.color = "inherit";
-      // Création d'une variable qui interroge le localStorage en object Javascript
+
+      // Interroger le localStorage
 
       let localStorageCart = JSON.parse(localStorage.getItem("products"));
 
-      if (localStorageCart !== null) {
-        // Cherche dans chaque objet de localStorageCart et vérifie si identique id + color trouvé dans productSelect
-        // Création d'une nouvelle variable productAlreadyordered
-        let productAlreadyOrdered = localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.id == productSelect.id) && localStorageCart.find((productAlreadyOrdered) => productAlreadyOrdered.color == productSelect.color);
+      if (localStorageCart === null) {
+        // LocalStorage vide
+        let cart = [];
 
-        if (productAlreadyOrdered !== undefined) {
-          // Si le produit a déjà été commandé
-          parseInt(productAlreadyOrdered.quantity); // Transformation de la quantité dans cet objet en nombres (idem à Number)
-          // Modification de la quantité déjà commandée  =
-          // quantité précedement commandée + quantité en selection que le client veut ajouter
-          productAlreadyOrdered.quantity = productAlreadyOrdered.quantity + productSelect.quantity;
+        cart.push(productSelect);
 
-          if (productAlreadyOrdered.quantity > 100) {
-            // Si la quantité dépasse 100
-            productAlreadyOrdered.quantity = 100;
-            newAlert.style.color = "#501717";
-            newAlert.innerText = `Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée à ${productAlreadyOrdered.quantity} exemplaires de cet article`;
-            localStorage.setItem("products", JSON.stringify(localStorageCart));
-          } else {
-            // Si la quantité ne dépasse pas 100
-            localStorage.setItem("products", JSON.stringify(localStorageCart));
-            if (productSelect.quantity == 1) {
-              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
-            } else {
-              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
-            }
-          }
+        if (productSelect.quantity == 1) {
+          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
         } else {
-          // Si productAlreadyOrdered est Undefined => Si il n'y a pas de produit identique déjà commandé
-          localStorageCart.push(productSelect); // Ajout du produit selectionné en object javascript
+          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient ${productSelect.quantity}`;
+        }
+
+        localStorage.setItem("products", JSON.stringify(cart));
+      } else {
+        // LocalStorage contient déjà un produit
+
+        let productAlreadyOrdered = localStorageCart.find((e) => e.id == productSelect.id) && localStorageCart.find((e) => e.color == productSelect.color);
+
+        if (productAlreadyOrdered === undefined) {
+          // Si il y a un produit déjà commandé mais qu'il s'agit d'une autre référence
+          localStorageCart.push(productSelect);
 
           if (productSelect.quantity == 1) {
             newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
@@ -149,21 +131,28 @@ function addCart() {
             newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient ${productSelect.quantity}`;
           }
 
-          localStorage.setItem("products", JSON.stringify(localStorageCart)); // Enregistrement dans le local storage en chaine de caractères de l'article selctionné
-        }
-      } else {
-        // Si le local local Storage appelé dans la variable localStorageCart n'est pas trouvé donc n'existe pas
-        let cart = []; // Création d'un tableau vide à chaque click
-
-        cart.push(productSelect); // Ajout à ce tableau du produit selectionné
-
-        if (productSelect.quantity == 1) {
-          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
+          localStorage.setItem("products", JSON.stringify(localStorageCart));
         } else {
-          newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient ${productSelect.quantity}`;
-        }
+          // Si il y a un produit déjà commandé et qu'il s'agit d'une référence identique
+          parseInt(productAlreadyOrdered.quantity);
 
-        localStorage.setItem("products", JSON.stringify(cart)); // Enregistrement de ce tableau dans le local storage en chaine de caractères
+          productAlreadyOrdered.quantity = productAlreadyOrdered.quantity + productSelect.quantity;
+
+          if (productAlreadyOrdered.quantity < 100) {
+            if (productSelect.quantity == 1) {
+              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaire de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+            } else {
+              newAlert.innerText = `Vous venez d'ajouter ${productSelect.quantity} exemplaires de ce produit, votre panier en contient maintenant ${productAlreadyOrdered.quantity}`;
+            }
+            localStorage.setItem("products", JSON.stringify(localStorageCart));
+          } else {
+            productAlreadyOrdered.quantity = 100;
+            newAlert.style.color = "#501717";
+            newAlert.innerText = `Votre panier ne pas contenir plus de 100 produits identiques, la quantité à été limitée à ${productAlreadyOrdered.quantity} exemplaires de cet article`;
+
+            localStorage.setItem("products", JSON.stringify(localStorageCart));
+          }
+        }
       }
     }
   });
