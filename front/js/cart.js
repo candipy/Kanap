@@ -124,7 +124,7 @@ if (localStorage.getItem("products") === null) {
 
             if (localStorageCart.find((e) => e.id === articleHTMLId && e.color === articleHTMLcolor)) {
               localStorage.clear("products");
-              alert("Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finalier votre commande, veuillez réessayer plus tard");
+              alert("Nous sommes désolés mais une erreur s'est produite, nous n'avons pas pu finaliser votre commande, veuillez réessayer plus tard");
             } else {
               articleHMTL.remove();
               localStorage.setItem("products", JSON.stringify(localStorageCart));
